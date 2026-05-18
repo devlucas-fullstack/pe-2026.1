@@ -22,6 +22,7 @@ void imprimirEstoque(struct Cadastro p[], int tam);
 void imprimeCodigoDescricao(struct Cadastro p[], int tam);
 void processaVenda(struct Cadastro p[], int tam);
 void venda(struct Cadastro p[], int pos, int qtd);
+void imprimeCodigoDescricaoEstoqueZero(struct Cadastro p[], int tam);
 
 int main(){
     struct Cadastro cadastros[QTD_CAD];
@@ -33,6 +34,7 @@ int main(){
     processaVenda(cadastros, QTD_CAD);
     imprimirEstoque(cadastros, QTD_CAD);
     imprimeCodigoDescricao(cadastros, QTD_CAD);
+    imprimeCodigoDescricaoEstoqueZero(cadastros, QTD_CAD);
 
     return 0;
 }
@@ -170,6 +172,19 @@ void imprimeCodigoDescricao(struct Cadastro p[], int tam){
 
         printf("Código: %d\n", p[i].codigo);
         printf("Descrição: %s\n", p[i].descricao);
+    }
+}
+
+void imprimeCodigoDescricaoEstoqueZero(struct Cadastro p[], int tam){
+    printf("\n-----imprime código e descrição de produtos sem estoque-----\n");
+
+    for(int i = 0; i < tam; i++){
+        if(p[i].quantidade == 0){
+            printf("-----produto %d-----\n", i + 1);
+
+            printf("Código: %d\n", p[i].codigo);
+            printf("Descrição: %s\n", p[i].descricao);
+        }
     }
 }
 
