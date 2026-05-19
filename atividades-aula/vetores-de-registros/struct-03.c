@@ -19,6 +19,7 @@ void exibeSaldo(struct Conta c[], int numeroConta, int tam);
 void deposito(struct Conta c[], int numeroConta, int tam);
 void saque(struct Conta c[], int numeroConta, int tam);
 void exibeContas(struct Conta c[], int tam);
+void menu(struct Conta cp[], struct Conta cc[], int *tamC, int *tamP);
 
 int main(){
     struct Conta contaPoupanca[QTD_CONTAS];
@@ -27,18 +28,83 @@ int main(){
     int tamCorrente = 0;
     int tamPoupanca = 0;
 
-    cadastra(contaCorrente, 100, tamCorrente);
-    tamCorrente++;
-    cadastra(contaCorrente, 200, tamCorrente);
-    tamCorrente++;
-    cadastra(contaPoupanca, 300, tamPoupanca);
-    tamPoupanca++;
-    exibeSaldo(contaCorrente, 100, tamCorrente);
-    deposito(contaCorrente, 100, tamCorrente);
-    saque(contaCorrente, 100, tamCorrente);
-    exibeContas(contaCorrente, tamCorrente);
+    menu(contaPoupanca, contaCorrente, &tamCorrente, &tamPoupanca);
 
     return 0;
+}
+
+void menu(struct Conta cp[], struct Conta cc[], int *tamC, int *tamP){
+    int opcao, tipoConta, numConta;
+
+    do {
+        printf("\n-----banco-----\n");
+        printf("1 - Cadastrar conta\n");
+        printf("2 - Exibir saldo\n");
+        printf("3 - Depósito\n");
+        printf("4 - Saque\n");
+        printf("5 - Exibir contas\n");
+        printf("Escolha(0 p/ sair): ");
+        scanf("%d", &opcao);
+
+        if(opcao != 0){
+            printf("\n1 - Conta corrente\n");
+            printf("2 - Conta poupança");
+            scanf("%d", &tipoConta);
+        }
+
+        switch(opcao){
+            case 1:
+                printf("Digite o número da conta: ");
+                scanf("%d", &numConta);
+
+                if(tipoConta == 1){
+                    cadastra(cc, numConta, *tamC);
+                    (*tamC)++;
+                } else {
+                    cadastra(cp, numConta, *tamP);
+                    (*tamP)++;
+                }
+                break;
+            case 2:
+                printf("Digite o número da conta: ");
+                scanf("%d", &numConta);
+
+                if(tipoConta == 1){
+                    exibeSaldo(cc, numConta, *tamC);
+                } else {
+                    exibeSaldo(cp, numConta, *tamP);
+                }
+                break;
+            case 3:
+                printf("Digite o número da conta: ");
+                scanf("%d", &numConta);
+
+                if(tipoConta == 1){
+                    deposito(cc, numConta, *tamC);
+                } else {
+                    deposito(cp, numConta, *tamP);
+                }
+                break;
+            case 4:
+                printf("Digite o número da conta: ");
+                scanf("%d", &numConta);
+
+                if(tipoConta == 1){
+                    saque(cc, numConta, *tamC);
+                } else {
+                    saque(cp, numConta, *tamP);
+                }
+                break;
+            case 5:
+                if(tipoConta == 1){
+                    exibeContas(cc, *tamC);
+                } else {
+                    exibeContas(cp, *tamP);
+                }
+                break;
+        }
+
+    } while(opcao != 0);
 }
 
 int busca(struct Conta c[], int numeroConta, int tam){
