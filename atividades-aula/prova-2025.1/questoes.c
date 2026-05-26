@@ -78,7 +78,7 @@ void cadastrarCategoria(struct Categoria v[], int *qtd){
     char tempStr[50];
     int codigo;
 
-    if(*qtd > TAM){
+    if(*qtd >= TAM){
         printf("Não foi possível cadastrar categoria!");
         return;
     }
@@ -91,10 +91,10 @@ void cadastrarCategoria(struct Categoria v[], int *qtd){
         if(v[i].codigo == codigo){
             printf("Código já existe!");
             return;
-        } else {
-            v[*qtd].codigo = codigo;
         }
     }
+
+    v[*qtd].codigo = codigo;
 
     lerStr(tempStr, 50);
     printf("Digite o nome da categoria: ");
@@ -121,7 +121,12 @@ void imprimirProdutos(struct Produto vp[], int qtdProdutos, struct Categoria vc[
         printf("Código: %d\n", vp[i].codigo);
         printf("Nome: %s\n", vp[i].titulo);
         printf("Descrição: %s\n", vp[i].descricao);
-        printf("Categoria: %s\n", vc[i].nome);
+
+        for(int j = 0; j < qtdCategorias; j++){
+            if(vc[j].codigo == vp[j].categoria){
+                printf("Categoria: %s\n", vc[j].nome);
+            }
+        }
         printf("Preço: %lf\n", vp[i].preco / 100);
     }
 }
