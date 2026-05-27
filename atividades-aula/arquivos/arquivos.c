@@ -21,6 +21,12 @@ struct Vendas {
 
 void lerStr(char str[], int tamMax);
 int buscarProdutoPorId(int id, struct Produto * p);
+int buscarVendaPorId(int id, struct Vendas *v);
+void cadastrarProduto();
+void listarProdutos();
+void buscarProduto();
+void atualizarProduto();
+void removerProduto();
 void cadastrarVenda();
 void listarVendas();
 void buscarVenda();
@@ -34,6 +40,11 @@ int main(){
         printf("\n------------------------------\n");
         printf("SISTEMA DE VENDAS E ESTOQUE\n");
         printf("------------------------------\n");
+        printf("1 - Cadastrar produto\n");
+        printf("2 - Listar produtos\n");
+        printf("3 - Buscar produto\n");
+        printf("4 - Atualizar produto\n");
+        printf("5 - Remover produto\n");
         printf("6 - Cadastrar venda\n");
         printf("7 - Listar vendas\n");
         printf("8 - Buscar venda\n");
@@ -45,6 +56,21 @@ int main(){
         scanf("%d", &op);
 
         switch(op){
+            case 1:
+                cadastrarProduto();
+                break;
+            case 2:
+                listarProdutos();
+                break;
+            case 3:
+                buscarProduto();
+                break;
+            case 4:
+                atualizarProduto();
+                break;
+            case 5:
+                removerProduto();
+                break;
             case 6:
                 cadastrarVenda();
                 break;
@@ -99,6 +125,242 @@ int buscarProdutoPorId(int id, struct Produto * p){
     return 0;
 }
 
+int buscarVendaPorId(int id, struct Vendas *v){
+    FILE *arq = fopen("vendas.dat", "rb");
+
+    if(arq == NULL){
+        return 0;
+    }
+
+    while(fread(v, sizeof(struct Vendas), 1, arq)){
+
+        if(v->idVenda == id){
+            fclose(arq);
+            return 1;
+        }
+    }
+
+    fclose(arq);
+    return 0;
+}
+
+void cadastrarProduto(){
+
+    FILE *arq;
+    struct Produto p;
+    struct Produto temp;
+    int idDuplicado;
+    char tempStr[TAM_NOME];
+
+    printf("\n---- Cadastro de Produto ----\n");
+
+    // Validação do ID
+    do{
+        printf("ID: ");
+        scanf("%d", &p.id);
+        lerStr(tempStr, TAM_NOME);
+
+        if(p.id <= 0){
+            printf("ID Invalido. Digite um número  positivo.\n");
+            continue;
+        }
+
+        arq = fopen("produtos.dat", "rb");
+        idDuplicado = 0;
+
+        if(arq != NULL){
+            while(fread(&temp, sizeof(struct Produto), 1, arq)){
+                if(temp.id == p.id){
+                    idDuplicado = 1;
+                    break;
+                }
+            }
+            fclose(arq);
+        }
+
+        if(idDuplicado){
+            printf("ID já cadastrado. Tente outro.\n");
+        }
+    }while(p.id <= 0 || idDuplicado);
+
+    printf("Nome: ");
+    lerStr(p.nome, TAM_NOME);
+
+    do{
+        printf("Preço: ");
+        scanf("%lf", &p.preco);
+        if(p.preco < 0){
+            printf("Preço invalido.\n");
+        }
+    }while(p.preco < 0);
+
+    do {
+        printf("Estoque: ");
+        scanf("%d", &p.estoque);
+        if (p.estoque < 0){
+            printf("Estoque invalido.\n");
+        }
+    } while (p.estoque < 0);
+
+    arq = fopen("produtos.dat", "ab");
+    if(arq == NULL){
+        printf("\nErro ao abrir arquivo. Produto nao cadastrado.\n");
+        return;
+    }
+    fwrite(&p, sizeof(struct Produto), 1, arq);
+    fclose(arq);
+
+    printf("\nProduto cadastrado com sucesso!\n");
+}
+
+void listarProdutos(){
+    
+    FILE *arq;
+    struct Produto p;
+
+    arq = fopen("produtos.dat", "rb");
+
+    if(arq == NULL){
+        printf("\nNenhum produto cadastrado.\n");
+        return;
+    }
+
+    printf("\n---- Lista de Produtos ----\n");
+
+    while (fread(&p, sizeof(struct Produto), 1, arq)) {
+        printf("\nID: %d\n", p.id);
+        printf("Nome: %s\n", p.nome);
+        printf("Preco: %.2lf\n", p.preco);
+        printf("Estoque: %d\n", p.estoque);
+        printf("-----------------------------\n");
+    }
+
+    fclose(arq);
+
+}
+
+void buscarProduto(){
+
+    struct Produto p;
+    int id;
+    char tempStr[TAM_NOME];
+
+    printf("\nDigite o ID do produto: ");
+    scanf("%d", &id);
+    lerStr(tempStr, TAM_NOME);
+
+    if(buscarProdutoPorId(id, &p)){
+        printf("\n---- PRODUTO ENCONTRADO ----\n");
+        printf("ID: %d\n", p.id);
+        printf("Nome: %s\n", p.nome);
+        printf("Preco: %.2lf\n", p.preco);
+        printf("Estoque: %d\n", p.estoque);
+    } else {
+        printf("\nProduto não encontrado.\n");
+    }
+}
+
+void atualizarProduto(){
+
+    FILE *arq;
+    struct Produto p;
+    int id;
+    int encontrou = 0;
+    char tempStr[TAM_NOME];
+
+    printf("\n---- Atualizar Produto ----\n");
+
+    printf("Digite o ID do produto: ");
+    scanf("%d", &id);
+    lerStr(tempStr, TAM_NOME);
+
+    arq = fopen("produtos.dat", "rb+");
+
+    if(arq == NULL){
+        printf("\nNenhum produto cadastrado.\n");
+        return;
+    }
+
+    while(fread(&p, sizeof(struct Produto), 1, arq)){
+        if(p.id == id){
+            encontrou = 1;
+
+            printf("\nNovo nome: ");
+            lerStr(p.nome, TAM_NOME);
+
+            do {
+                printf("Novo preco: ");
+                scanf("%lf", &p.preco);
+                if (p.preco < 0) printf("Preco invalido.\n");
+            } while (p.preco < 0);
+
+            do {
+                printf("Novo estoque: ");
+                scanf("%d", &p.estoque);
+                if (p.estoque < 0) printf("Estoque invalido.\n");
+            } while (p.estoque < 0);
+
+            fseek(arq, -(long)sizeof(struct Produto), SEEK_CUR);
+            fwrite(&p, sizeof(struct Produto), 1, arq);
+
+            printf("\nProduto atualizado com sucesso!\n");
+            break;
+        }
+    }
+
+    if(!encontrou){
+        printf("\nProduto nao encontrado.\n");
+    }
+    fclose(arq);
+}
+
+void removerProduto(){
+
+    FILE *original;
+    FILE *temp;
+    struct Produto p;
+    int id, encontrou = 0;
+
+    printf("\n---- Remover Produto ----\n");
+
+    printf("Digite o ID do produto: ");
+    scanf("%d", &id);
+
+    original = fopen("produtos.dat", "rb");
+
+     if (original == NULL) {
+        printf("\nNenhum produto cadastrado.\n");
+        return;
+    }
+
+    temp = fopen("temp.dat", "wb");
+    if(temp == NULL){
+        printf("\nErro ao criar arquivo temporario.\n");
+        fclose(original);
+        return;
+    }
+    
+    while (fread(&p, sizeof(struct Produto), 1, original)) {
+        if (p.id != id) {
+            fwrite(&p, sizeof(struct Produto), 1, temp);
+        } else {
+            encontrou = 1;
+        }
+    }
+
+    fclose(original);
+    fclose(temp);
+
+    if (encontrou) {
+        remove("produtos.dat");
+        rename("temp.dat", "produtos.dat");
+        printf("\nProduto removido com sucesso!\n");
+    } else {
+        remove("temp.dat");
+        printf("\nProduto nao encontrado.\n");
+    }
+}
+
 void cadastrarVenda(){
     FILE *arq;
     int status;
@@ -116,8 +378,16 @@ void cadastrarVenda(){
 
     printf("\n-----Cadastro de Venda-----\n");
 
-    printf("ID da venda: ");
-    scanf("%d", &v.idVenda);
+    do{
+        printf("ID da venda: ");
+        scanf("%d", &v.idVenda);
+
+        if(buscarVendaPorId(v.idVenda, &v)){
+            printf("ID ja cadastrado!\n");
+        }
+
+    }while(buscarVendaPorId(v.idVenda, &v));
+
     lerStr(tempStr, TAM_NOME);
     printf("Nome do cliente: ");
     lerStr(v.cliente, TAM_NOME);
@@ -137,7 +407,46 @@ void cadastrarVenda(){
         scanf("%d", &v.idsProduto[i]);
 
         if(buscarProdutoPorId(v.idsProduto[i], &p)) {
+            if(p.estoque <= 0){
+                printf("Produto sem estoque!\n");
+                fclose(arq);
+                return;
+            }
+
             v.valorTotal += p.preco;
+
+            FILE *produto = fopen("produtos.dat", "r+b");
+
+            if(produto != NULL){
+                struct Produto aux;
+
+                while(fread(&aux, sizeof(struct Produto), 1, produto)){
+                    if(aux.id == p.id){
+                        aux.estoque--;
+                        fseek(produto, -(long)sizeof(struct Produto), SEEK_CUR);
+                        fwrite(&aux, sizeof(struct Produto), 1, produto);
+                    break;
+                    }
+                }
+            }
+
+            status = fclose(produto);
+
+            if(status != 0){
+                printf("\nErro ao fechar arquivo!");
+                return;
+            }
+
+        } else {
+            printf("Produto nao encontrado!\n");
+            status = fclose(arq);
+
+            if(status != 0){
+                printf("Erro ao fechar arquivo!\n");
+                return;
+            }
+
+            return;
         }
     }
     
@@ -288,6 +597,7 @@ void removerVenda(){
     FILE *arq;
     FILE *novo; 
     int id, status;
+    int encontrou = 0;
     
     arq = fopen("vendas.dat", "rb");
 
@@ -310,9 +620,34 @@ void removerVenda(){
     scanf("%d", &id);
 
     while(fread(&v, sizeof(v), 1, arq) == 1) {
-
         if(v.idVenda != id) {
             fwrite(&v, sizeof(v), 1, novo);
+        } else {
+            for(int i = 0; i < v.qtdsProduto; i++){
+                FILE *produto = fopen("produtos.dat", "rb+");
+
+                if(produto != NULL){
+                    struct Produto p;
+
+                    while(fread(&p, sizeof(struct Produto), 1, produto)){
+                        if(p.id == v.idsProduto[i]){
+                            p.estoque++;
+                            fseek(produto, -(long)sizeof(struct Produto), SEEK_CUR);
+                            fwrite(&p, sizeof(struct Produto), 1, produto);
+                            break;
+                        }
+                    }
+
+                    status = fclose(produto);
+
+                    if(status != 0){
+                        printf("\nErro ao fechar o arquivo!");
+                        return;
+                    }
+                }
+            }
+
+            encontrou = 1;
         }
     }
 
@@ -331,5 +666,9 @@ void removerVenda(){
     remove("vendas.dat");
     rename("temp.dat", "vendas.dat");
 
-    printf("\nVenda removida com sucesso!\n");
+    if(encontrou){
+        printf("\nVenda removida com sucesso!\n");
+    } else {
+        printf("\nVenda nao encontrada!\n");
+    }
 }
