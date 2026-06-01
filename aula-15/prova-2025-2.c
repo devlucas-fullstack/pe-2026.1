@@ -108,7 +108,7 @@ int alteraProduto(struct Produto v[], int tam){
 }
 
 void venda(struct Produto vp[], int tamProd, struct Venda vv[], int tamVendas){
-    int idVenda, qtdProdutoDif, qtdVenda, achei, iProduto;
+    int idVenda, qtdDiff, iProduto, qtdVenda;
     char descBusca[TAM_NOME];
 
     printf("Digite o ID da venda: ");
@@ -116,62 +116,39 @@ void venda(struct Produto vp[], int tamProd, struct Venda vv[], int tamVendas){
 
     for(int i = 0; i < tamVendas; i++){
         if(vv[i].id == idVenda){
-            printf("Venda com esse ID já existe!\n");
+            printf("ID de venda já existe!");
             return;
         }
     }
 
     vv[tamVendas].id = idVenda;
-    vv[tamVendas].qtdProdutosVendidos = 0; // Começa com 0 itens inseridos
+    vv[tamVendas].qtdProdutosVendidos = 0;
 
     do{
-        printf("Digite a quantidade de produtos diferentes que deseja comprar(1 a 5): ");
-        scanf("%d", &qtdProdutoDif);
-    } while(qtdProdutoDif < 1 || qtdProdutoDif > 5);
+        printf("Digite a quantidade de produtos diferentes que deseja comprar: ");
+        scanf("%d", &qtdDiff);
+    } while(qtdDiff >= 1 && qtdDiff <= 5);
 
-    for(int i = 0; i < qtdProdutoDif; i++){
-        achei = 0; // Reseta a flag para cada produto novo da lista
-
-        printf("\nDigite a descrição do produto %d que deseja comprar: ", i + 1);
+    for(int i = 0; i < qtdDiff; i++){
+        printf("Digite a descrição do produto %d: i + 1");
         lerStr(descBusca, TAM_NOME);
 
-        // CORREÇÃO 1: Laço interno para BUSCAR em todo o estoque de produtos
         for(int j = 0; j < tamProd; j++){
             if(strcmp(vp[j].descricao, descBusca) == 0){
-                iProduto = j; // Guarda o índice onde o produto real foi achado
-                achei = 1;
-                break; // Se achou, pode parar de procurar
+                iProduto = j;
             }
         }
 
-        if(achei == 1){
-            printf("Digite a quantidade de produtos %d que deseja comprar (Estoque: %d): ", i + 1, vp[iProduto].estoque);
-            scanf("%d", &qtdVenda);
+        printf("Digite a quantidade do produto %d que deseja comprar: ", i + 1);
+        scanf("%d", &qtdVenda);
 
-            if(qtdVenda >= 1 && qtdVenda <= vp[iProduto].estoque){
-                // 1. Deduz do estoque
-                vp[iProduto].estoque -= qtdVenda;
-                
-                // CORREÇÃO 2: Salva nos vetores usando a posição atual (0, 1, 2...)
-                int posAtual = vv[tamVendas].qtdProdutosVendidos;
-                
-                vv[tamVendas].idsProdutos[posAtual] = vp[iProduto].id;
-                vv[tamVendas].qtdsVendidas[posAtual] = qtdVenda;   // Faltava salvar a quantidade!
-                
-                // 3. Incrementa a quantidade de produtos inseridos nesta venda
-                vv[tamVendas].qtdProdutosVendidos++;
-                
-                printf("Produto adicionado com sucesso!\n");
-            } else {
-                printf("Quantidade inválida ou estoque insuficiente!\n");
-                i--; // Faz o loop repetir para o usuário tentar o produto i de novo
-            }
-        } else {
-            printf("Produto não encontrado!\n");
-            i--; // Faz o loop repetir para o usuário tentar o produto i de novo
+        if(qtdVenda >= 1 && qtdVenda <= vp[iProduto].estoque){
+            vp[iProduto].estoque -= qtdVenda;
+            int posAtual = vv[tamVendas].qtdProdutosVendidos;
+            vv[tamVendas].idsProdutos[posAtual] = vp[iProduto].id;
+            vv[tamVendas].qtdsVendidas[posAtual] = qtdVenda;
+            vv[tamVendas].qtdProdutosVendidos++; 
         }
     }
-    
-    printf("\nVenda cadastrada com sucesso!\n");
 }
 
